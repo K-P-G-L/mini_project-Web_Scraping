@@ -1,6 +1,7 @@
-import os
 from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
 # 프로젝트 루트 경로 찾기 (app 폴더의 상위 폴더)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 

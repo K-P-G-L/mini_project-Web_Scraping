@@ -27,13 +27,12 @@ prod = [
 [tool.ruff]
 line-length = 88
 target-version = "py313"
+
+[tool.ruff.lint]  # 이 섹션 아래로 옮겨야 경고가 사라집니다
 select = ["E", "F", "I"]
 ignore = ["E501"]
 
-
-
-
 [tool.aerich]
 tortoise_config = "app.db.base.TORTOISE_CONFIG"
-location = "app/db/migrations"  # 이 부분을 기존 "./migrations"에서 변경
+location = "app/db/migrations"
 src_folder = "./"
