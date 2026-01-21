@@ -4,30 +4,21 @@ from fastapi.security import OAuth2PasswordBearer
 
 # 암호화
 from jose import jwt
-from passlib.context import CryptContext
 
 from datetime import datetime
-from dotenv import load_dotenv
 import os
 
-from app.models.user import User
+# User 클래스 불러오기
+from app.repositories.user_repo import get_user_by_username
+
+# OAuth2 토큰 추출
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # JWT 설정값
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
-# 비밀번호 암호화 컨텍스트
-pwd_context = CryptContext(
-    schemes=["argon2"],
-    deprecated="auto"
-)
-
-# OAuth2 토큰 추출
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-async def get_current_user(
-        token: str = Depends(oauth2_scheme)
-):
+async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         # 1) 토큰 디코드
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -38,7 +29,9 @@ async def get_current_user(
             raise HTTPException(status_code=401, detail="로그인 실패")
 
         # 2) 유저 조회
-        user = await User.get_or_none(user_name=username)
+        user = await get_user_by_username(username)
+        if not user:
+            raise HTTPException(status_code=401, detail="로그인 실패")
 
         # 원래 코드의 흐름상 user가 None이면 인증 실패로 보는 게 자연스러움
         if not user:
