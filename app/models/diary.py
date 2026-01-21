@@ -1,5 +1,6 @@
 from tortoise import fields, models
 
+
 class Diary(models.Model):
     id = fields.IntField(pk=True)
     # 1:N 관계 설정 (User와 연결)

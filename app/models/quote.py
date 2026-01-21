@@ -1,5 +1,6 @@
 from tortoise import fields, models
 
+
 class Quote(models.Model):
     quotes_id = fields.IntField(pk=True)
     content = fields.TextField(null=True)
@@ -7,6 +8,7 @@ class Quote(models.Model):
 
     class Meta:
         table = "Quotes"
+
 
 class Bookmark(models.Model):
     bookmarks_id = fields.IntField(pk=True)
