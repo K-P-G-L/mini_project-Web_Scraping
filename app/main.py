@@ -8,7 +8,7 @@ app = FastAPI(title="FastAPI Mini Project")
 
 @app.get("/")
 async def read_root():
-    return {"message": "Hello World! Database is connected."}
+    return {"message": "Database is connected."}
 
 
 # DB 연결 설정 (이게 있어야 아까처럼 DB와 통신이 가능합니다)
