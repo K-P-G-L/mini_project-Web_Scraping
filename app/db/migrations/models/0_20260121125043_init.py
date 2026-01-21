@@ -5,14 +5,62 @@ RUN_IN_TRANSACTION = True
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        ALTER TABLE "Diaries" ADD "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
-        ALTER TABLE "Qeustions" RENAME TO "Questions";"""
+        CREATE TABLE IF NOT EXISTS "Questions" (
+    "question_id" SERIAL NOT NULL PRIMARY KEY,
+    "question_text" TEXT
+);
+CREATE TABLE IF NOT EXISTS "Quotes" (
+    "quotes_id" SERIAL NOT NULL PRIMARY KEY,
+    "content" TEXT,
+    "author" VARCHAR(100)
+);
+CREATE TABLE IF NOT EXISTS "token_blacklist" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "token" VARCHAR(500) NOT NULL,
+    "blacklisted_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expires_at" TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "idx_token_black_token_3c6615" ON "token_blacklist" ("token");
+CREATE TABLE IF NOT EXISTS "Users" (
+    "user_id" VARCHAR(50) NOT NULL PRIMARY KEY,
+    "user_name" VARCHAR(100),
+    "pwd_hash" VARCHAR(255),
+    "token_id" VARCHAR(255)
+);
+COMMENT ON COLUMN "Users"."user_id" IS '사용자 고유 아이디 (문자열)';
+COMMENT ON COLUMN "Users"."user_name" IS '사용자 이름/닉네임';
+COMMENT ON COLUMN "Users"."pwd_hash" IS '해싱된 비밀번호';
+COMMENT ON COLUMN "Users"."token_id" IS '인증 토큰 식별자';
+CREATE TABLE IF NOT EXISTS "Bookmarks" (
+    "bookmarks_id" SERIAL NOT NULL PRIMARY KEY,
+    "quote_id" INT NOT NULL REFERENCES "Quotes" ("quotes_id") ON DELETE CASCADE,
+    "user_id" VARCHAR(50) NOT NULL REFERENCES "Users" ("user_id") ON DELETE CASCADE,
+    CONSTRAINT "uid_Bookmarks_user_id_a04dd5" UNIQUE ("user_id", "quote_id")
+);
+CREATE TABLE IF NOT EXISTS "Diaries" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "title" VARCHAR(255),
+    "content" TEXT,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" VARCHAR(50) NOT NULL REFERENCES "Users" ("user_id") ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "User_Questions" (
+    "user_question" SERIAL NOT NULL PRIMARY KEY,
+    "question_id" INT NOT NULL REFERENCES "Questions" ("question_id") ON DELETE CASCADE,
+    "user_id" VARCHAR(50) NOT NULL REFERENCES "Users" ("user_id") ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "aerich" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "version" VARCHAR(255) NOT NULL,
+    "app" VARCHAR(100) NOT NULL,
+    "content" JSONB NOT NULL
+);"""
 
 
 async def downgrade(db: BaseDBAsyncClient) -> str:
     return """
-        ALTER TABLE "Diaries" DROP COLUMN "updated_at";
-        ALTER TABLE "Questions" RENAME TO "Qeustions";"""
+        """
 
 
 MODELS_STATE = (
