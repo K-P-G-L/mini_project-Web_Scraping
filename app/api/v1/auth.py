@@ -1,12 +1,12 @@
+import os
+from datetime import datetime
+
 # FastAPI
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 # 암호화
 from jose import jwt
-
-from datetime import datetime
-import os
 
 # User 클래스 불러오기
 from app.repositories.user_repo import get_user_by_username
