@@ -1,3 +1,4 @@
+#API용 비즈니스 로직
 from app.repositories.quote_repo import QuoteRepository #DB 접근 담당 Repository
 from app.schemas.quote import QuoteResponse # API에 반환할 Schema 소환
 

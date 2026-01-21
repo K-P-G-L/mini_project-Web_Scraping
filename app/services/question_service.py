@@ -1,3 +1,4 @@
+#API용 비즈니스 로직
 from app.repositories.question_repo import QuestionRepository
 from app.schemas.question import QuestionResponse
 

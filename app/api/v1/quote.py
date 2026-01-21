@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.repositories.quote_repo import QuoteRepository # DB접근 Repository
 from app.services.quote_service import QuoteService # 서비스 로직
+from app.services.quote_scraping_service import QuoteScrapingService
 from app.schemas.quote import QuoteResponse # API 응답 형태 (DTO)
 
 router = APIRouter(prefix="/quotes", tags=["Quotes"]) # /quotes 엔드포인트로 묶음, Swagger에서 Quotes로 표시
@@ -18,3 +19,13 @@ async def get_random_quote(): # HTTP요청 비동기처리
             status_code=status.HTTP_404_NOT_FOUND,
             detail="명언 없슈",
         )
+
+
+@router.post("/scrape", status_code=status.HTTP_200_OK,
+             )
+async def scrape_quotes():
+    repo = QuoteRepository()
+    service = QuoteScrapingService(repo)
+
+    count = await service.collect_and_save()
+    return {"saved_count": count}

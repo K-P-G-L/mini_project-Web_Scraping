@@ -11,6 +11,7 @@ app = FastAPI(title="FastAPI Mini Project")
 app.include_router(quote_router, prefix="/api/v1")
 app.include_router(question_router, prefix="/api/v1")
 
+
 @app.get("/")
 async def read_root():
     return {"message": "Hello World! Database is connected."}
