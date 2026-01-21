@@ -1,18 +1,27 @@
-from app.scraping.quote_scraper import QuoteScraper #명언 긁어오기 스크래퍼
-from app.repositories.quote_repo import QuoteRepository # DB에 저장하는 Repository
+import asyncio
+
+from app.repositories.quote_repo import QuoteRepository
+from app.scraping.quote_scraper import QuoteScraper
 
 
-class QuoteScrapingService: #스크래핑 결과를 "처리+저장"하는 서비스
-    def __init__(self, repo: QuoteRepository): #Repository를 외부에서 주입
+class QuoteScrapingService:
+    def __init__(self, repo: QuoteRepository):
         self.scraper = QuoteScraper()
         self.repo = repo
 
-    async def collect_and_save(self) -> int: #스크래핑 -> 중복제거 -> DB저장까지
-        quotes = self.scraper.scrape() # app/services/quote_scraping_service.py의 return값
+    async def collect_and_save(self) -> int:
+        # 1. 스크래핑 실행
+        # (만약 scrape()가 비동기가 아니라면 별도 스레드에서 실행하여 서버 멈춤 방지)
+        loop = asyncio.get_event_loop()
+        quotes = await loop.run_in_executor(None, self.scraper.scrape)
 
-        unique = {} #중복 제거용 딕셔너리(가공)
-        for q in quotes:
-            unique[q["content"]] = q # 키 = 명언내용 (같은 내용이면 덮어써서 중복제거)
+        if not quotes:
+            return 0
 
-        await self.repo.save_many(list(unique.values())) #중복 제거된 명언들만 DB에 저장
-        return len(unique) #처리한 명언 개수
+        # 2. 중복 제거 (내용 기준)
+        unique = {q["content"]: q for q in quotes}
+
+        # 3. DB 저장 (이미 작성하신 Repository의 save_many 호출)
+        await self.repo.save_many(list(unique.values()))
+
+        return len(unique)
