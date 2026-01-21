@@ -1,10 +1,18 @@
-from tortoise import fields
-from tortoise.models import Model
+from tortoise import fields, models
 
 
-class ReflectionQuestion(Model): #성찰 질문(ReflectionQuestion)
-    id = fields.IntField(pk=True)
-    content = fields.TextField()
+class Question(models.Model):
+    question_id = fields.IntField(pk=True)
+    question_text = fields.TextField(null=True)
 
     class Meta:
-        table = "reflection_questions" #데이터베이스 내에서의 실제 테이블 이름
+        table = "Questions"
+
+
+class UserQuestion(models.Model):
+    user_question = fields.IntField(pk=True)
+    user = fields.ForeignKeyField("models.User", related_name="user_questions")
+    question = fields.ForeignKeyField("models.Question", related_name="answered_users")
+
+    class Meta:
+        table = "User_Questions"

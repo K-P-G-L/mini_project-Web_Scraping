@@ -1,11 +1,21 @@
-from tortoise import fields
-from tortoise.models import Model
+from tortoise import fields, models
 
 
-class Quote(Model): # Quote(명언) 테이블
-    id = fields.IntField(pk=True)
-    content = fields.TextField()
+class Quote(models.Model):
+    quotes_id = fields.IntField(pk=True)
+    content = fields.TextField(null=True)
     author = fields.CharField(max_length=100, null=True)
 
-    class Meta: #테이블 세부 설정
-        table = "quotes" #데이터베이스 저장시 테이블이름 'quotes'
+    class Meta:
+        table = "Quotes"
+
+
+class Bookmark(models.Model):
+    bookmarks_id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField("models.User", related_name="bookmarks")
+    quote = fields.ForeignKeyField("models.Quote", related_name="bookmarked_by")
+
+    class Meta:
+        table = "Bookmarks"
+        # 복합 유니크 제약 조건 (한 유저가 같은 명언 중복 북마크 방지)
+        unique_together = (("user", "quote"),)
