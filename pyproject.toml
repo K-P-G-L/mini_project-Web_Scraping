@@ -34,6 +34,6 @@ select = ["E", "F", "I"]
 ignore = ["E501"]
 
 [tool.aerich]
-tortoise_config = "app.db.base.TORTOISE_CONFIG"
-location = "app/db/migrations"
-src_folder = "./"
+tortoise_orm = "app.db.base.TORTOISE_CONFIG"
+location = "./migrations"
+src_folder = "./."
