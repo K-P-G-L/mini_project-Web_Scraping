@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # 프로젝트 루트의 .env.dev 파일을 읽어옵니다.
