@@ -37,3 +37,4 @@ ignore = ["E501"]
 tortoise_config = "app.db.base.TORTOISE_CONFIG"
 location = "app/db/migrations"
 src_folder = "./"
+
