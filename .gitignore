@@ -3,4 +3,5 @@
 .env.dev/
 __pycache__/
 .idea/
-*.pyc
+*.pyc.env
+.env.dev
