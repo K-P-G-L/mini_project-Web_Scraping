@@ -1,22 +1,47 @@
-from fastapi import FastAPI
+from datetime import datetime
+from typing import List
+from fastapi import Depends, FastAPI, HTTPException, status
 from tortoise.contrib.fastapi import register_tortoise
 
-from app.api.v1.auth import router as auth_router
+# 스키마 및 라우터 임포트
+from app.schemas.diary import DiaryCreate, DiaryResponse, DiaryUpdate
 from app.db.base import TORTOISE_CONFIG
+from app.api.v1.quote import router as quote_router
+from app.api.v1.question import router as question_router
+from app.api.v1.auth import router as auth_router
 
-app = FastAPI(title="FastAPI Mini Project")
+app = FastAPI(title="FastAPI Mini Project - Unified")
 
+# [핵심] 라우터 등록: prefix를 /api/v1으로 설정
+app.include_router(quote_router, prefix="/api/v1", tags=["Quotes"])
+app.include_router(question_router, prefix="/api/v1", tags=["Questions"])
 app.include_router(auth_router, prefix="/api/v1")
 
-@app.get("/")
+# 임시 DB (일기용)
+fake_diary_db = []
+
+def get_current_user() -> str:
+    return "test_user"
+
+@app.get("/", tags=["Root"])
 async def read_root():
-    return {"message": "Database is connected."}
+    return {"message": "Hello World! Database is connected."}
 
+# --- 일기(Diary) CRUD API (생략 가능하나 구조 유지) ---
+@app.post("/diaries", response_model=DiaryResponse, status_code=status.HTTP_201_CREATED, tags=["Diary"])
+async def create_diary(diary_in: DiaryCreate, current_user: str = Depends(get_current_user)):
+    new_diary = {"id": len(fake_diary_db) + 1, "title": diary_in.title, "content": diary_in.content, "author_id": current_user, "created_at": datetime.now()}
+    fake_diary_db.append(new_diary)
+    return new_diary
 
-# DB 연결 설정 (이게 있어야 아까처럼 DB와 통신이 가능합니다)
+@app.get("/diaries", response_model=List[DiaryResponse], tags=["Diary"])
+async def get_diaries():
+    return fake_diary_db
+
+# DB 연결 설정 (PostgreSQL 연결 정보는 [Tortoise ORM Config](https://tortoise.github.io) 참고)
 register_tortoise(
     app,
     config=TORTOISE_CONFIG,
-    generate_schemas=False,  # 마이그레이션 도구(aerich)를 쓸 거니까 False!
+    generate_schemas=False,
     add_exception_handlers=True,
 )
