@@ -35,11 +35,3 @@ target-version = "py313"
 [tool.ruff.lint]  # 이 섹션 아래로 옮겨야 경고가 사라집니다
 select = ["E", "F", "I"]
 ignore = ["E501"]
-
-<<<<<<< HEAD
-[tool.aerich]
-tortoise_orm = "app.db.base.TORTOISE_CONFIG"
-location = "./migrations"
-src_folder = "./."
-=======
->>>>>>> main

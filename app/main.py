@@ -8,10 +8,12 @@ from app.schemas.diary import DiaryCreate, DiaryResponse, DiaryUpdate
 from app.db.base import TORTOISE_CONFIG
 from app.api.v1.quote import router as quote_router
 from app.api.v1.question import router as question_router
+from app.api.v1.auth import router as auth_router
 
 app = FastAPI(title="FastAPI Mini Project - Unified")
 
 # [핵심] 라우터 등록: prefix를 /api/v1으로 설정
+app.include_router(auth_router, prefix="/api/v1", tags=["Auth"])
 app.include_router(quote_router, prefix="/api/v1", tags=["Quotes"])
 app.include_router(question_router, prefix="/api/v1", tags=["Questions"])
 
