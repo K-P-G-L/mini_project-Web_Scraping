@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     SECRET_KEY: str 
     ALGORITHM: str = "HS256"
 
+    # 🔥 이 두 줄이 없어서 에러가 났던 것입니다! 추가해 주세요.
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+
     @property
     def DATABASE_URL(self) -> str:
         # Tortoise ORM용 URL 형식

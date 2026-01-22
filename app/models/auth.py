@@ -2,12 +2,11 @@ from tortoise import fields, models
 
 
 class TokenBlacklist(models.Model):
+    """로그아웃된 토큰을 저장하는 테이블"""
     id = fields.IntField(pk=True)
-    jti = fields.CharField(max_length=500, index=True)  # 무효화된 토큰 값
-    blacklisted_at = fields.DatetimeField(auto_now_add=True)  # 블랙리스트 등록 시간
-    expires_at = (
-        fields.DatetimeField()
-    )  # 토큰의 원래 만료 시간 (이 시간이 지나면 DB에서 삭제 가능)
+    token = fields.CharField(max_length=255, unique=True)
+    expires_at = fields.DatetimeField()
+    blacklisted_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = "token_blacklist"
