@@ -3,7 +3,7 @@ from tortoise import fields, models
 
 class TokenBlacklist(models.Model):
     id = fields.IntField(pk=True)
-    token = fields.CharField(max_length=500, index=True)  # 무효화된 토큰 값
+    jti = fields.CharField(max_length=500, index=True)  # 무효화된 토큰 값
     blacklisted_at = fields.DatetimeField(auto_now_add=True)  # 블랙리스트 등록 시간
     expires_at = (
         fields.DatetimeField()
