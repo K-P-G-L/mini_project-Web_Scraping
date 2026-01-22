@@ -1,0 +1,24 @@
+.card {
+    border-radius: 20px;
+    background: white;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.04);
+}
+.input-field {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    outline: none;
+    background: #fcfcfd;
+}
+.input-field:focus { border-color: #4f46e5; background: white; }
+.btn-primary {
+    background: #4f46e5;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }

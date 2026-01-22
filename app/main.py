@@ -1,6 +1,10 @@
 from typing import List
+import os
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from tortoise.contrib.fastapi import register_tortoise
 
 # 1. 의존성 및 라우터 임포트
@@ -20,12 +24,42 @@ from app.schemas.diary import DiaryCreate, DiaryResponse, DiaryUpdate
 # 2. FastAPI 인스턴스 초기화
 app = FastAPI(title="FastAPI Locle Lab Project")
 
-# --- 3. 라우터 등록 ---
+# --- [추가] 3. CORS 설정 ---
+# 프론트엔드(브라우저)에서 백엔드 API에 접근할 수 있도록 허용합니다.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 개발 단계에서는 모두 허용, 배포 시 특정 도메인으로 제한 권장
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- 4. 라우터 등록 ---
 app.include_router(auth_router, prefix="/api/v1", tags=["Auth"])
 app.include_router(quote_router, prefix="/api/v1", tags=["Quotes"])
 app.include_router(question_router, prefix="/api/v1", tags=["Questions"])
 
-# --- 4. Tortoise ORM 설정 ---
+# --- [추가] 5. 정적 파일 및 메인 페이지 설정 ---
+# app/static 폴더가 없다면 생성해야 합니다.
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+if not os.path.exists(STATIC_DIR):
+    os.makedirs(STATIC_DIR)
+
+# /static 경로로 정적 파일 제공
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+@app.get("/", tags=["Root"])
+async def read_root():
+    # 사용자가 접속했을 때 app/static/index.html 파일을 보여줍니다.
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Hello World! static/index.html 파일을 생성해주세요."}
+
+
+# --- 6. Tortoise ORM 설정 ---
 MY_TORTOISE_CONFIG = {
     "connections": {"default": settings.DATABASE_URL},
     "apps": {
@@ -50,13 +84,7 @@ register_tortoise(
     add_exception_handlers=True,
 )
 
-# --- 5. 비즈니스 로직 (Root & Diary) ---
-
-
-@app.get("/", tags=["Root"])
-async def read_root():
-    return {"message": "Hello World! Database is connected and Models are loaded."}
-
+# --- 7. 비즈니스 로직 (Diary) ---
 
 # [미션: 일기 작성]
 @app.post(
@@ -68,6 +96,7 @@ async def read_root():
 async def create_diary(
     diary_in: DiaryCreate, current_user: User = Depends(get_current_user)
 ):
+    # user_id가 모델 정의에 따라 다를 수 있으니 확인 필요 (현재 user_name 사용 중)
     new_diary = await Diary.create(
         title=diary_in.title, content=diary_in.content, user_id=current_user.user_name
     )
@@ -98,14 +127,13 @@ async def update_diary(
     return diary
 
 
-# [미션: 일기 삭제 (안내 문구 출력을 위해 200 OK로 수정)]
+# [미션: 일기 삭제]
 @app.delete(
     "/diaries/{diary_id}",
-    status_code=status.HTTP_200_OK,  # <--- 204에서 200으로 변경!
+    status_code=status.HTTP_200_OK,
     tags=["Diary"],
 )
 async def delete_diary(diary_id: int, current_user: User = Depends(get_current_user)):
-    # 보안: 삭제 권한 확인
     diary = await Diary.get_or_none(id=diary_id, user_id=current_user.user_name)
 
     if not diary:
@@ -116,7 +144,6 @@ async def delete_diary(diary_id: int, current_user: User = Depends(get_current_u
 
     await diary.delete()
 
-    # 204일 때는 무시되었던 이 반환값이 이제 200 응답 본문으로 전달됩니다.
     return {
         "status": "success",
         "message": f"{diary_id}번 일기가 성공적으로 삭제되었습니다.",

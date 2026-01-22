@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mind Care</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-gray-50">
+
+    <div id="auth-section" class="flex items-center justify-center min-h-screen">
+        <div class="auth-card bg-white p-8 rounded-xl shadow-lg w-96">
+            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-indigo-600 text-center">로그인</h2>
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="닉네임" class="input-field hidden">
+                <input type="text" id="email" placeholder="아이디(ID)" class="input-field">
+
+                <div class="space-y-1">
+                    <input type="password" id="password" placeholder="비밀번호 (8자 이상)" class="input-field" minlength="8" oninput="validatePassword()">
+                    <p id="pw-hint" class="text-[11px] text-red-500 mt-1 hidden">비밀번호는 8자 이상이어야 합니다.</p>
+                </div>
+
+                <button id="login-btn" onclick="login()" class="btn-primary w-full">접속하기</button>
+                <button id="signup-btn" onclick="signup()" class="btn-primary w-full hidden">가입하기</button>
+
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    <span id="auth-switch-text">계정이 없으신가요?</span>
+                    <a href="javascript:void(0)" onclick="toggleAuth()" id="auth-switch-link" class="text-indigo-500 font-bold ml-1">회원가입</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-section" class="hidden container mx-auto p-6 max-w-6xl">
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">My Mind Care</h1>
+            <button onclick="logout()" class="text-red-500 font-semibold hover:underline">로그아웃</button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="card p-6 flex flex-col min-h-[180px]">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-indigo-500 font-bold text-xs uppercase tracking-widest">Today's Quote</h3>
+                    <div class="flex gap-3 text-gray-400">
+                        <button onclick="toggleBookmark()" title="북마크 토글">
+                            <i data-lucide="bookmark" id="bookmark-icon" class="w-6 h-6 transition-all"></i>
+                        </button>
+                        <button onclick="fetchQuote()" title="새로고침">
+                            <i data-lucide="refresh-cw" class="w-5 h-5 hover:text-indigo-500"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-grow flex items-center justify-center">
+                    <p id="quote-box" class="italic text-gray-700 text-lg text-center leading-relaxed font-serif">명언을 불러오는 중...</p>
+                </div>
+            </div>
+
+            <div class="card p-6 flex flex-col min-h-[180px]">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-green-500 font-bold text-xs uppercase tracking-widest">Today's Question</h3>
+                    <button onclick="fetchQuestion()" class="text-gray-400 hover:text-green-500">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="flex-grow flex items-center justify-center">
+                    <p id="question-box" class="text-gray-800 text-lg font-medium text-center">질문을 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card p-6 sticky top-6">
+                    <h3 id="diary-form-title" class="text-xl font-bold mb-4">기록하기</h3>
+                    <div class="space-y-3">
+                        <input type="hidden" id="edit-diary-id">
+                        <input type="text" id="diary-title" placeholder="제목" class="input-field">
+                        <textarea id="diary-content" rows="6" placeholder="마음을 기록하세요" class="input-field"></textarea>
+                        <div class="flex gap-2">
+                            <button id="save-diary-btn" onclick="saveDiary()" class="btn-primary flex-grow text-sm">저장하기</button>
+                            <button id="cancel-edit-btn" onclick="clearDiaryForm()" class="hidden bg-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i> 저장한 명언
+                    </h3>
+                    <div id="bookmark-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar text-sm text-gray-600">
+                        <p class="text-gray-400 italic">저장된 명언이 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="card p-6 min-h-[600px]">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800">나의 기록들</h3>
+                    <div id="diary-list" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
