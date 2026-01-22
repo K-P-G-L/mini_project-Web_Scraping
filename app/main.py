@@ -1,10 +1,10 @@
-from typing import List
 import os
+from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from tortoise.contrib.fastapi import register_tortoise
 
 # 1. 의존성 및 라우터 임포트
@@ -51,7 +51,6 @@ if not os.path.exists(STATIC_DIR):
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
-
 # --- 6. Tortoise ORM 설정 ---
 MY_TORTOISE_CONFIG = {
     "connections": {"default": settings.DATABASE_URL},
@@ -78,6 +77,7 @@ register_tortoise(
 )
 
 # --- 7. 비즈니스 로직 (Diary) ---
+
 
 # [미션: 일기 작성]
 @app.post(
@@ -141,6 +141,7 @@ async def delete_diary(diary_id: int, current_user: User = Depends(get_current_u
         "status": "success",
         "message": f"{diary_id}번 일기가 성공적으로 삭제되었습니다.",
     }
+
 
 @app.get("/", tags=["Root"])
 async def read_root():
