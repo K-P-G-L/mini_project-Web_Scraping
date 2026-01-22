@@ -1,5 +1,6 @@
-from passlib.context import CryptContext
 import uuid
+
+from passlib.context import CryptContext
 
 # 비밀번호 암호화 컨텍스트
 pwd_context = CryptContext(

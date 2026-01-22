@@ -4,8 +4,8 @@ from typing import List
 from fastapi import Depends, FastAPI, status
 from tortoise.contrib.fastapi import register_tortoise
 
-from app.api.v1.question import router as question_router
 from app.api.v1.auth import router as auth_router
+from app.api.v1.question import router as question_router
 from app.api.v1.quote import router as quote_router
 from app.db.base import TORTOISE_CONFIG
 

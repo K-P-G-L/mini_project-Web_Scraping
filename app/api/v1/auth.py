@@ -102,24 +102,22 @@ async def login(
     if not verify_password(password, user.pwd_hash):
         raise HTTPException(status_code=400, detail="로그인 실패")
     
-    token_id = new_token_id()
-    user.token_id = token_id
-    await user.save(update_fields=["token_id"])
+    # token_id = new_token_id()
+    # user.token_id = token_id
+    # await user.save(update_fields=["token_id"])
 
-    expire = datetime.utcnow() + timedelta(minutes=15)
-    token = jwt.encode(
-        {"sub": user.user_id, "jti": token_id, "exp": expire},
-        SECRET_KEY,
-        algorithm=ALGORITHM
-    )
+    # expire = datetime.utcnow() + timedelta(minutes=15)
+    # token = jwt.encode(
+    #     {"sub": user.user_id, "jti": token_id, "exp": expire},
+    #     SECRET_KEY,
+    #     algorithm=ALGORITHM
+    # )
 
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/logout")
 async def logout(
-    user=Depends(get_current_user),
-    token: str = Depends(oauth2_scheme)
-):
+    user=Depends(get_current_user)):
     result = await logout_user(user.user_id)
     return {"message": "로그아웃 되었습니다."}
 
