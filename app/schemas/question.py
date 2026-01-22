@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
-class QuestionResponse(BaseModel): # 자아성찰 API
-    id: int
-    content: str
+class QuestionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True # OMR객체 -> Schema변환 가능하게함
+    question_id: int
+    # 문자열이거나, 없을 경우 None을 허용하도록 수정합니다.
+    question_text: str | None = None
