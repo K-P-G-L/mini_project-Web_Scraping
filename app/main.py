@@ -50,13 +50,6 @@ if not os.path.exists(STATIC_DIR):
 # /static 경로로 정적 파일 제공
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-@app.get("/", tags=["Root"])
-async def read_root():
-    # 사용자가 접속했을 때 app/static/index.html 파일을 보여줍니다.
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"message": "Hello World! static/index.html 파일을 생성해주세요."}
 
 
 # --- 6. Tortoise ORM 설정 ---
@@ -148,3 +141,11 @@ async def delete_diary(diary_id: int, current_user: User = Depends(get_current_u
         "status": "success",
         "message": f"{diary_id}번 일기가 성공적으로 삭제되었습니다.",
     }
+
+@app.get("/", tags=["Root"])
+async def read_root():
+    # 사용자가 접속했을 때 app/static/index.html 파일을 보여줍니다.
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Hello World! static/index.html 파일을 생성해주세요."}
