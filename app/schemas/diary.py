@@ -29,3 +29,4 @@ class DiaryResponse(BaseModel):
 
     class Config:
         from_attributes = True # ORM 모델을 자동으로 Pydantic으로 변환
+
