@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 class QuoteScraper:  # 명언 스크래핑 전용 클래스
     BASE_URL = "https://saramro.com/quotes"
 
-                                # 수집 하는 페이지 수
+    # 수집 하는 페이지 수
     def scrape(self, max_pages: int = 10) -> list[dict]:  # 명언을 수집하는 메서드
         results = []  # 모든 페이지의 결과를 담을 리스트
 

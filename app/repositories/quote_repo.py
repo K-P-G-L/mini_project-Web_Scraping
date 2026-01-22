@@ -3,35 +3,48 @@ from typing import Dict, List, Optional
 
 from tortoise.transactions import in_transaction
 
-from app.models.quote import Quote
+from app.models.quote import Bookmark, Quote  # Bookmark 모델 추가 소환!
 
 
-class QuoteRepository:  # 명언(Quote) 테이블에 접근하는 클래스 (명언 DB담당)
+class QuoteRepository:
+    # --- 기존 메서드들 ---
     async def get_random(self) -> Optional[Quote]:
-        """
-        PostgreSQL의 order_by('?') 미지원 문제를 해결하기 위해
-        모든 레코드를 조회 후 Python random 모듈로 1개를 선택합니다.
-        """
         all_quotes = await Quote.all()
         if not all_quotes:
             return None
         return random.choice(all_quotes)
 
     async def save_many(self, quotes: List[Dict[str, str]]) -> None:
-        """
-        스크래핑 결과를 DB에 저장합니다.
-        중복 방지를 위해 get_or_create를 사용하며, 트랜잭션으로 안전성을 보장합니다.
-        """
         async with in_transaction():
             for q in quotes:
-                # content가 동일한 명언이 이미 있다면 생성하지 않고 건너뜁니다.
                 await Quote.get_or_create(
                     content=q.get("content"),
                     defaults={"author": q.get("author", "Unknown")},
                 )
 
     async def get_by_id(self, quote_id: int) -> Optional[Quote]:
-        """
-        ID를 통해 특정 명언을 조회합니다. (상세 조회용)
-        """
         return await Quote.filter(quotes_id=quote_id).first()
+
+    # --- 신규 추가: 북마크 관련 메서드 ---
+
+    async def create_bookmark(self, user, quote: Quote) -> Bookmark:
+        """북마크를 DB에 생성합니다. (unique_together에 의해 중복 시 에러 발생)"""
+        return await Bookmark.create(user=user, quote=quote)
+
+    async def get_bookmarks_by_user(self, user) -> List[Quote]:
+        """
+        사용자가 북마크한 명언 리스트를 가져옵니다.
+        N+1 문제를 방지하기 위해 prefetch_related를 사용합니다.
+        """
+        # Bookmark 테이블을 조회하면서 연결된 Quote(명언) 정보를 미리 가져옵니다.
+        bookmarks = await Bookmark.filter(user=user).prefetch_related("quote")
+        # 결과에서 명언 객체들만 리스트로 추출합니다.
+        return [b.quote for b in bookmarks]
+
+    async def delete_bookmark(self, user, quote_id: int) -> bool:
+        """특정 사용자의 특정 명언 북마크를 삭제합니다."""
+        bookmark = await Bookmark.filter(user=user, quote_id=quote_id).first()
+        if bookmark:
+            await bookmark.delete()
+            return True
+        return False

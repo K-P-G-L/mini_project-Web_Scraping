@@ -1,19 +1,19 @@
 from datetime import datetime, timedelta, timezone
 
+# 암호화 (명시적 임포트로 밑줄 방지)
+import jose.jwt as jwt
+
 # FastAPI
 from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 
-# 암호화 (명시적 임포트로 밑줄 방지)
-import jose.jwt as jwt
-
 from app.core.config import settings
 from app.core.security import get_password_hash, new_token_id, verify_password
+from app.models.auth import TokenBlacklist
 
 # 모델 및 리포지토리 (정의된 모델만 호출하여 중복 제거)
 from app.models.user import User
-from app.models.auth import TokenBlacklist
 from app.repositories.user_repo import get_user_by_username, logout_user
 
 # 1. OAuth2 설정
@@ -24,6 +24,7 @@ SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 
 # --- 의존성 주입 (인증 확인) ---
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -58,14 +59,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         # 에러 발생 시 Swagger Response Body에서 원인을 바로 확인할 수 있도록 수정
         raise HTTPException(status_code=401, detail=f"인증 실패 원인: {str(e)}")
 
+
 # --- API 엔드포인트 ---
 
 router = APIRouter(prefix="/auth")
+
 
 class RegisterBody(BaseModel):
     user_id: str
     user_name: str | None = None
     pwd_hash: str = Field(..., min_length=8)
+
 
 @router.post("/register")
 async def register(payload: RegisterBody):
@@ -79,6 +83,7 @@ async def register(payload: RegisterBody):
         token_id=None,
     )
     return {"user_id": user.user_id, "user_name": user.user_name}
+
 
 @router.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
@@ -98,9 +103,12 @@ async def login(username: str = Form(...), password: str = Form(...)):
     )
     return {"access_token": token, "token_type": "bearer"}
 
+
 @router.post("/logout")
 async def logout(token: str = Depends(oauth2_scheme), user=Depends(get_current_user)):
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_exp": False})
+    payload = jwt.decode(
+        token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_exp": False}
+    )
     jti = payload.get("jti")
     exp = payload.get("exp")
 
