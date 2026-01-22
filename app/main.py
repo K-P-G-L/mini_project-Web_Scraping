@@ -27,7 +27,7 @@ MY_TORTOISE_CONFIG = {
     "apps": {
         "models": {
             # app.models.user 안에 User와 TokenBlacklist가 모두 있어야 합니다.
-            "models": ["app.models.user", "aerich.models","app.models.auth"],
+            "models": ["app.models.user", "aerich.models","app.models.auth","app.models.quote","app.models.question"],
             "default_connection": "default",
         },
     },
