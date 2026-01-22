@@ -1,10 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.repositories.question_repo import QuestionRepository
-from app.services.question_service import QuestionService
-from app.services.question_scraping_service import QuestionScrapingService
 from app.schemas.question import QuestionResponse
-
+from app.services.question_scraping_service import QuestionScrapingService
+from app.services.question_service import QuestionService
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
 

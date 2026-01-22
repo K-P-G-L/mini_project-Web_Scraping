@@ -1,5 +1,7 @@
 import random
+
 from app.models.question import Question
+
 
 class QuestionRepository:
     """질문 데이터베이스 테이블에 접근하는 저장소 레이어"""
