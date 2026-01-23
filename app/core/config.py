@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
+    
+    SECRET_KEY: str 
+    ALGORITHM: str = "HS256"
 
     # 🔥 이 두 줄이 없어서 에러가 났던 것입니다! 추가해 주세요.
     SECRET_KEY: str
