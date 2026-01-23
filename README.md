@@ -9,27 +9,25 @@
 - uv run ruff check . --fix
 - uv run ruff format .
 
+# DB 설정
 - brew install postgresql@15
-ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
--  brew services start postgresql@15
-ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-- 포스트그리
 
+-  brew services start postgresql@15
+
+# 포스트그리
  - /opt/homebrew/opt/postgresql
 
-- 유저 생성 
-
+# 유저 생성 
 - CREATE ROLE mini_user WITH LOGIN PASSWORD 'password';
 
-- DB 생성
-
+# DB 생성
 - CREATE DATABASE mini_project OWNER mini_user;
 
--  권한 부여
-  
+# 권한 부여
 - ALTER ROLE mini_user SUPERUSER;
 
-uv run aerich init -t app.db.base.TORTOISE_CONFIG
-uv run aerich init-db
+# init설정
+- uv run aerich init -t app.db.base.TORTOISE_CONFIG
+- uv run aerich init-db
 
 <img width="1387" height="563" alt="스크린샷 2026-01-21 오전 11 25 54" src="https://github.com/user-attachments/assets/71b3c3cf-8a73-408c-9d5c-9fd9221c6554" />
