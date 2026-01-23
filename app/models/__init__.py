@@ -6,7 +6,7 @@ from .user import User
 
 __all__ = [
     "User",
-    "Diary",
+    "Diary",  # 반드시 대문자로 수정!
     "Quote",
     "Bookmark",
     "Question",
