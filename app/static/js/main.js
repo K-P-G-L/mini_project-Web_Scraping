@@ -26,11 +26,32 @@ function validatePassword() {
     const pwInput = document.getElementById('password');
     const pwHint = document.getElementById('pw-hint');
     const isLoginMode = document.getElementById('auth-title').innerText === "로그인";
-    if (!isLoginMode && pwInput.value.length > 0 && pwInput.value.length < 8) {
+    const password = pwInput.value;
+
+    // 로그인 모드일 때는 복잡도 검사를 하지 않음
+    if (isLoginMode) return true;
+
+    // 1. 전체 정규식 체크 (영문 + 숫자 + 특수문자 + 8자 이상)
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (password.length > 0 && !passwordRegex.test(password)) {
+        // 상세 에러 안내
+        if (!/[a-zA-Z]/.test(password)) {
+            pwHint.innerText = "영문을 포함해주세요.";
+        } else if (!/\d/.test(password)) {
+            pwHint.innerText = "숫자를 포함해주세요.";
+        } else if (!/[@$!%*?&]/.test(password)) {
+            pwHint.innerText = "특수문자를 포함해주세요.";
+        } else if (password.length < 8) {
+            pwHint.innerText = "8글자 이상으로 만드시오.";
+        }
+
         pwHint.classList.remove('hidden');
-    } else {
-        pwHint.classList.add('hidden');
+        return false; // 검증 실패 시 false 반환
     }
+
+    pwHint.classList.add('hidden');
+    return true; // 검증 통과
 }
 
 function toggleAuth() {
@@ -76,8 +97,13 @@ async function signup() {
     const userId = document.getElementById('email').value;
     const userName = document.getElementById('username').value;
     const password = document.getElementById('password').value;
+
     if (!userId || !userName || !password) { alert("모든 필드를 입력해주세요."); return; }
-    if (password.length < 8) { alert("비밀번호를 8자 이상으로 설정해주세요."); return; }
+
+    if (!validatePassword()) {
+        alert("비밀번호 규칙을 확인해주세요.");
+        return;
+    }
 
     try {
         const res = await fetch(`${AUTH_API}/register`, {
@@ -85,11 +111,45 @@ async function signup() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, user_name: userName, pwd_hash: password })
         });
-        if (res.ok) { alert("회원가입 완료! 로그인해주세요."); toggleAuth(); }
-        else { const err = await res.json(); alert("가입 실패: " + (err.detail || "오류 발생")); }
-    } catch (e) { console.error(e); }
-}
 
+        const data = await res.json();
+
+        if (res.ok) {
+            alert("회원가입 완료! 로그인해주세요.");
+            toggleAuth();
+        } else {
+            // [해결] 어떤 구조가 오든 내용을 강제로 끄집어내는 로직
+            let errorMessage = "가입 실패:\n";
+
+            if (data && data.detail) {
+                if (Array.isArray(data.detail)) {
+                    // Pydantic 에러 (리스트 형태: [{msg: '...', ...}]) 처리
+                    errorMessage += data.detail.map(err => {
+                        // 객체라면 msg 필드를 찾고, 없으면 객체 전체를 문자로 변환
+                        if (typeof err === 'object' && err !== null) {
+                            return `- ${err.msg || JSON.stringify(err)}`;
+                        }
+                        return `- ${err}`;
+                    }).join('\n');
+                } else if (typeof data.detail === 'object') {
+                    // 단일 객체 형태일 때
+                    errorMessage += data.detail.msg || JSON.stringify(data.detail);
+                } else {
+                    // 단순 문자열일 때 ("이미 존재하는 ID입니다" 등)
+                    errorMessage += data.detail;
+                }
+            } else {
+                // detail 키 자체가 없을 때 응답 전체 출력
+                errorMessage += JSON.stringify(data) || "알 수 없는 오류가 발생했습니다.";
+            }
+
+            alert(errorMessage);
+        }
+    } catch (e) {
+        console.error("네트워크 에러:", e);
+        alert("서버 연결에 실패했습니다.");
+    }
+}
 // --- [대시보드] 초기화 및 데이터 로드 ---
 async function initDashboard() {
     await fetchBookmarks(); // 북마크 상태를 먼저 알아야함

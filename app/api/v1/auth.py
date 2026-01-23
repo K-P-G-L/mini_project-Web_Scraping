@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, timezone
 
 # 암호화 (명시적 임포트로 밑줄 방지)
@@ -6,7 +7,7 @@ import jose.jwt as jwt
 # FastAPI
 from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import settings
 from app.core.security import get_password_hash, new_token_id, verify_password
@@ -66,9 +67,27 @@ router = APIRouter(prefix="/auth")
 
 
 class RegisterBody(BaseModel):
-    user_id: str
+    user_id: str = Field(..., min_length=4)
     user_name: str | None = None
     pwd_hash: str = Field(..., min_length=8)
+
+    @field_validator("pwd_hash")
+    @classmethod  # V2에서는 classmethod를 붙여주는 것이 정석입니다.
+    def validate_password_details(cls, v: str):
+        if len(v) < 8:
+            raise ValueError("비밀번호를 8글자 이상으로 만드시오.")
+
+        # 영문(대소문자 무관) 체크
+        if not re.search(r"[a-zA-Z]", v):
+            raise ValueError("영문을 포함해주세요.")
+
+        if not re.search(r"\d", v):
+            raise ValueError("숫자를 포함해주세요.")
+
+        if not re.search(r"[@$!%*?&]", v):
+            raise ValueError("특수문자를 포함해주세요.")
+
+        return v
 
 
 @router.post("/register")
